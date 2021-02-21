@@ -1,8 +1,11 @@
 ---
 title: 'STAT 231: Problem Set 1A'
-author: "YOUR NAME HERE"
+author: "Alastair Poole"
 date: "due by 5 PM on Monday, February 22"
-output: pdf_document
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
 ---
 
 In order to most effectively digest the textbook chapter readings -- and the  new R commands each presents -- series A homework assignments are designed to encourage you to read the textbook chapters actively and in line with the textbook's Pro Tip on page 33:
@@ -30,7 +33,7 @@ Steps to proceed:
 ```{r, setup, include=FALSE}
 # Load packages here 
 library(mdsr)   
-
+library(mosaic)
 knitr::opts_chunk$set(
   tidy=FALSE,     # display code as typed
   size="small",   # slightly smaller font for code
@@ -47,17 +50,24 @@ Figure 3.3 in Section 3.1.1 shows a scatterplot that uses both location and labe
 data(CIACountries)
 
 # define the plot object
-g <- 
+g <- ggplot(data = CIACountries, aes(y = gdp, x = educ))
   
 # print the plot 
-g
+g + geom_text(aes(label = country, color = net_users), size = 3)
 ```
 
 ### b.
 Now, update the plot with more informative labels.  Label the x-axis "% of GDP spent on education" and the y-axis "Gross Domestic Product (GDP)".  Hint: see Section 3.2.2 for an example of one way to label the axes.
 
 ```{r}
+data(CIACountries)
 
+# define the plot object
+g <- ggplot(data = CIACountries, aes(y = gdp, x = educ))
+  
+# print the plot 
+g + geom_text(aes(label = country, color = net_users), size = 3) +
+  labs(x = "% of GDP spent on education", y = "Gross Domestic Product (GDP)")
 
 ```
 
@@ -65,14 +75,28 @@ Now, update the plot with more informative labels.  Label the x-axis "% of GDP s
 Next, move the legend so that it's located on the top of the plot as opposed to the right of the plot.  Hint: see Section 3.1.4 for an example on how to change the legend position.
 
 ```{r}
+data(CIACountries)
 
+# define the plot object
+g <- ggplot(data = CIACountries, aes(y = gdp, x = educ))
+  
+# print the plot 
+g + geom_text(aes(label = country, color = net_users), size = 3) +
+  labs(x = "% of GDP spent on education", y = "Gross Domestic Product (GDP)") + theme(legend.position = "top")
 ```
 
 ### d.
 Lastly, Section 3.1.2 discusses *scale*, and demonstrates how to display GDP on a logarithmic scale to better discern differences in GDP.  Update the figure so GDP is on a log10 scale.  
 
 ```{r}
+data(CIACountries)
 
+# define the plot object
+g <- ggplot(data = CIACountries, aes(y = gdp, x = educ))
+  
+# print the plot 
+g + geom_text(aes(label = country, color = net_users), size = 3) +
+  labs(x = "% of GDP spent on education", y = "Gross Domestic Product (GDP)") + theme(legend.position = "top") + coord_trans(y = "log10")
 ```
 
 
@@ -82,7 +106,7 @@ Lastly, Section 3.1.2 discusses *scale*, and demonstrates how to display GDP on 
 ### a.
 Consider Figure 3.7 in Section 3.2.1.  What does `reorder(drg, mean_charge)` do?  Recreate the plot, but use `x = drg` instead of `x = reorder(drg, mean_charge)`.  What happens?
 
-> ANSWER: 
+> ANSWER: 'reorder(drg, mean_charge)' takes the first input: 'drg' and reorders it in terms of the second input: 'mean_charge.' So in this case that means taking a particular medical procedure and ordering it in ascending order from lowest mean charge to highest mean charge. When recreating the plot with the specified change, the plot no longer takes an ascending shape. With the reordering, each value was greater than the value to the left. In the new plot, this is not the case and medical procedures are just plotted against their mean charge without any particular order.
 
 ```{r}
 data(MedicareCharges)
@@ -91,20 +115,39 @@ ChargesNJ <- MedicareCharges %>%
   filter(stateProvider == "NJ")
 
 # create the plot object
-p <- 
-  
+p <- ggplot(
+  data = ChargesNJ, 
+  aes(x = drg, y = mean_charge)
+)
   
 # print the plot
-p
+p + geom_col(fill = "gray") +
+  ylab("Statewide Average Charges ($)") + 
+  xlab("Medical Procedure (DRG)") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = rel(0.5)))
 ```
 
 ### b.
 Replace `x = drg` with `x = reorder(drg, mean_charge)`, but also remove the `theme()` line.  Now what happens?  What was the purpose of the `theme()` line?  Hint: You may need to knit the document and look at the pdf to better observe what's happening.
 
-> ANSWER:  
+> ANSWER: Replacing the label of the x-axis reverts the plot to show an ascending plot where the medical charges are in order from least to greatest mean charge. Removing the 'theme()' line completely jumbles up all the information on the x-axis. It is no longer clear what any of the markings are regarding what medical procedures are having their mean charges plotted. Therefore the purpose of the 'theme()' line must be to appropriately space and order the information on the plot's axis.
 
 ```{r}
+data(MedicareCharges)
+ChargesNJ <- MedicareCharges %>% 
+  ungroup() %>%
+  filter(stateProvider == "NJ")
 
+# create the plot object
+p <- ggplot(
+  data = ChargesNJ, 
+  aes(x = reorder(drg, mean_charge), y = mean_charge)
+)
+  
+# print the plot
+p + geom_col(fill = "gray") +
+  ylab("Statewide Average Charges ($)") + 
+  xlab("Medical Procedure (DRG)")
 ```
 
 
@@ -113,7 +156,7 @@ Replace `x = drg` with `x = reorder(drg, mean_charge)`, but also remove the `the
 
 As you read through (and, better yet -- code along with (not required, but useful practice!)) -- the extended example on historical baby names in section 3.3.1, write down two questions you have about any of the R code used in that example.  (Your questions could be about what a specific part of the code -- ggplot or not -- is actually doing, or a more general question about any of the commands used.)  Please be thoughtful about your questions; we will use them (anonymously) in an exercise in class this week.
 
-> ANSWER: 
+> ANSWER: 1. What is the code doing when it is filling something in? For instance, I see this type of code repeated several times, and I do not know what is happening: 'fill = "#b2d7e9".' 2. What is the effect of surrounding either a word or an operator with percent signs (%)?
 
 ```{r}
 # to get you started following along . . .
