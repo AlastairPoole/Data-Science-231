@@ -115,7 +115,7 @@ Let's start by creating a scatterplot with log(spending) on the x-axis and log(e
 
 First, sketch the scatterplot (don't worry about the actual x-y relationship, but be sure to identify the different variables that will be needed to create the plot).  What variables do you need in the dataset in order to create the scatterplot in ggplot?  What will each observation (row) in the dataset represent?
 
-> RESPONSE: 
+> RESPONSE: The variables needed for the x-axis will be "2013_Total Health Spending" and "2014_Total Health Spending". The variables for the y-axis will be "2013_Employer" and "2014_Employer". We will also need the variable "Location". Each observation in the dataset will be a point on the scatterplot representing a particular state's healthcare spending and employer covereage for a particular year.
 
 What are some of the steps that will need to be taken to get the data in that form?  
 
