@@ -30,6 +30,7 @@ library(robotstxt)
 library(rvest)
 library(knitr)
 library(janitor)
+library(ggplot2)
 
 knitr::opts_chunk$set(
   tidy=FALSE,     # display code as typed
@@ -53,7 +54,7 @@ knit_hooks$set(output = function(x, options) {
 \newpage 
 # If you discussed this assignment with any of your peers, please list who here:
 
-> ANSWER:
+> ANSWER: Kriti Verman, Brandon Kwon
 
 \newpage
 # 1. Justices of the Supreme Court of the United States 
@@ -63,15 +64,13 @@ https://en.wikipedia.org/wiki/List_of_justices_of_the_Supreme_Court_of_the_Unite
 
 
 ```{r}
-
-
+paths_allowed("https://en.wikipedia.org/wiki/List_of_justices_of_the_Supreme_Court_of_the_United_States")
 ```
 
 \newpage
 b. Go to the [List of Justices of the Supreme Court of the United States](https://en.wikipedia.org/wiki/List_of_justices_of_the_Supreme_Court_of_the_United_States) and scrape the table for the Justices.  Write, test, and save your code in an R script called `scrape_justices.R`, and write the data frame out to a csv file called `justices.csv` using the `write_csv` function.
 
 *Be sure to push your .R and .csv files to your GitHub repo.*
-
 
 ```{r eval=FALSE}
 ## Add your code that is in justices.R to this code chunk.  
@@ -80,7 +79,15 @@ b. Go to the [List of Justices of the Supreme Court of the United States](https:
 ## (We do want the grader to be able to see the code, though, as you'll only 
 ## submit this one knit PDF to Gradescope.)
 
-
+url <- "https://en.wikipedia.org/wiki/List_of_justices_of_the_Supreme_Court_of_the_United_States"
+tables <- (
+  url %>%
+    read_html() %>%
+    html_nodes("table"))
+  html_table()
+  justice <- html_table(tables[[2]], fill = TRUE)
+  justice
+write_csv(justice, file = "justices.csv")
 ```
 
 
@@ -89,10 +96,10 @@ c. Load `justices.csv` into this file using the `read_csv` function.  Then, run 
 
 Create a visualization to show the distribution of tenure length of U.S. Supreme Court judges.  Interpret the plot.
 
-> ANSWER:   
+> ANSWER: There seems to be a much higher concentration of U.S. Supreme Court Justices that have served on the court for a tenure of less than 20 years. This is when compared to Justices that have served for at least 25 years. This could be because you need to have a considerable amount of legal experience before assuming a seat, and as a result most appointed justices are elderly. So despite having their seat "for life" many might reach a retirement age relatively early in their career serving on the Supreme Court. 
 
 ```{r}
-justices <- read_csv("INSERT YOUR PATH HERE/justices.csv")
+justices <- read_csv("~/Desktop/Data-Science-231/justices.csv")
 
 justices2 <- justices %>%
   clean_names() %>%
@@ -113,7 +120,10 @@ justices2 <- justices %>%
            , sep = "\\(") %>%
   mutate(date_confirmed = lubridate::mdy(date_confirmed_vote))
 
-
+ggplot(data = justices2, aes(x = tenure_length)) +
+  geom_density(fill = "seagreen", color = "midnightblue") +
+  labs(title = "Distribution of U.S. Supreme Court Justice's Term Lengths",
+       x = "Tenure Length (years)")
 ```
 
 
@@ -123,7 +133,7 @@ justices2 <- justices %>%
 a. Confirm (using an R command) that automated scraping of the Brainy Quote webpage (https://www.brainyquote.com/) is allowed.
 
 ```{r}
-
+paths_allowed("https://www.brainyquote.com/")
 ```
 
 
@@ -176,7 +186,23 @@ Go to BrainyQuote.com and search a different topic (or search an Author) that in
 ## (We do want the grader to be able to see the code, though, as you'll only 
 ## submit this one knit PDF to Gradescope.)
 
+quotes_html <- read_html("https://www.brainyquote.com/topics/fitness-quotes")
 
+quotes <- quotes_html %>%
+  html_nodes(".oncl_q") %>%
+  html_text() 
+
+person <- quotes_html %>%
+  html_nodes(".oncl_a") %>%
+  html_text()
+
+# put in data frame with two variables (person and quote)
+quotes_dat <- data.frame(quote = quotes, stringsAsFactors = FALSE) %>%
+  filter(quote != "\n") %>%
+  mutate(person = person
+         , together = paste('"', as.character(quote), '" --'
+                            , as.character(person), sep=""))
+write_csv(quotes_dat, file = "quotes.csv")
 ```
 
 
@@ -184,7 +210,11 @@ Go to BrainyQuote.com and search a different topic (or search an Author) that in
 c. Load `quotes.csv` into this file using the `read_csv` function.  Write code to select *three* of the quotes at random and print them (i.e., set `size = 3` in the `sample` function).
 
 ```{r, linewidth = 60}
+quotes_dat1 <- read_csv("~/Desktop/Data-Science-231/quotes.csv")
 
+quote_for_the_day1 <- quotes_dat1[sample(1:nrow(quotes_dat1), size = 3),]
+
+cat(quote_for_the_day1$together)
 ```
 
 
