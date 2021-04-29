@@ -42,8 +42,7 @@ library(igraph)
 The following dataset contains migration counts for decades between 1960 and 2000 between the origin (`origincode`) and destination (`destcode`) countries given in the data. 
 
 ```{r}
-path_in <- "YOUR PATH HERE"
-MigrationFlows <- read_csv(paste0(path_in,"/MigrationFlows.csv"))
+MigrationFlows <- read_csv("~/Desktop/Data-Science-231/Labs/MigrationFlows.csv")
 
 head(MigrationFlows, n=10)
 
@@ -58,7 +57,7 @@ We are going to look at the migration flows of females in 2000.  First, we do (v
 
 How many rows are in this dataset?
 
-> ANSWER: 
+> ANSWER: 13805 rows are in this dataset.
 
 ```{r}
 MigrationFlowsF <- MigrationFlows %>%
@@ -68,7 +67,7 @@ MigrationFlowsF <- MigrationFlows %>%
 
 Now, this dataframe can be used to create a directional network object with edges indicating migration from the origin county to a destination country for the migration network of females in 2000.  How many nodes are in this network? How many edges?
 
-> ANSWER:   
+> ANSWER: 13805 edges and 226 nodes.
 
 ```{r}
 # graph_from_data_frame is from the igraph package
@@ -145,13 +144,24 @@ Create a similar visualization but just for the countries in the vector `eastEur
 ```{r}
 MigrationEastEurp <- MigrationFlowsF %>%
   filter(destcode %in% eastEurope & origincode %in% eastEurope)
+mig_easteurp <- graph_from_data_frame(MigrationEastEurp
+                                   , directed = TRUE)
+migration_network_ee <- ggnetwork(mig_easteurp)
+ggplot(data = migration_network_ee
+       , aes(x = x, y = y, xend = xend, yend = yend)) +
+  geom_edges(arrow=arrow(type="closed", length=unit(6,"pt"))
+            , color = "lightgray") +
+  geom_nodes() +
+  geom_nodelabel(aes(label = name)) +
+  theme_blank()
+
 ```
 
 The plot of this network is much clearer than a plot of the entire network. We can see that some countries like Russia and Belarus are not popular migration destinations while other countries, like Poland and Hungary are (though we can't see the numbers migrating into these countries from this graph).
 
 Recalling that `Y2000` represents female migration in 2000, is this an edge or vertex attribute?
 
-> ANSWER: 
+> ANSWER: This will be an edge attribute.
 
 Let's modify the graph so that edge width is a function of migration flow size. In `ggplot` we can do this using the `size` option in `geom_edges()`.  (Notice that the `ggnetwork` data frame will contain the edge variables).  
 
@@ -185,11 +195,11 @@ ggplot(data = ggnetwork(mig_easteurp)
 
 Which do you think is the more effective visual cue in this case?
 
-> ANSWER:  
+> ANSWER: I think size of arrows are slightly more effective, just because color really only separates the top migration flow from the rest, but does not distinguish between countries of lesser migration flows.
 
 Might the color scheme in the plot below be more effective?
 
-> ANSWER:
+> ANSWER: Slightly, yes. This is more distinguished than the color scheme earlier.
 
 ```{r}
 ggplot(data = ggnetwork(mig_easteurp)
